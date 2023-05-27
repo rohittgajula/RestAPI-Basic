@@ -114,4 +114,3 @@ class loginAPI(APIView):
             return Response({'message':'sucess..'})
         return Response(serializer.errors)
     
-    
