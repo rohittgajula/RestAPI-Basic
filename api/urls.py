@@ -1,11 +1,23 @@
-from django.urls import path
+from django.urls import path, include
 
-from app.views import *
+from app import views
+
+# ----------------- 
+# for ViewSet we need to import as router.
+
+from rest_framework.routers import DefaultRouter
+
+router = DefaultRouter()
+router.register('person', views.PeopleViewSet, basename='person')
+urlpatterns = router.urls
+
+# ----------------------------------
 
 urlpatterns = [
-    path('people/', people),
-    path('login/', login),
-    path('personAPI/', PersonAPI.as_view()),        # class based views
-    path('loginAPI/', loginAPI.as_view()),
+    path('', include(router.urls)),                 # for model viewset.
+    path('people/', views.people),
+    path('login/', views.login),
+    path('personAPI/', views.PersonAPI.as_view()),        # class based views
+    path('loginAPI/', views.loginAPI.as_view()),
 ]
 

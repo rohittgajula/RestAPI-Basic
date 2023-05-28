@@ -3,6 +3,8 @@ from rest_framework.decorators import api_view
 
 from rest_framework.views import APIView
 
+from rest_framework import viewsets                 # for model viewset.
+
 from .models import *
 from .serializers import *
 
@@ -114,3 +116,10 @@ class loginAPI(APIView):
             return Response({'message':'sucess..'})
         return Response(serializer.errors)
     
+# -------------------------
+
+# model-viewset is used to make CRUD operations in two lines of code. 
+
+class PeopleViewSet(viewsets.ModelViewSet):
+    serializer_class = PersonSerializer
+    queryset =Person.objects.all()
