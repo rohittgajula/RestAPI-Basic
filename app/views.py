@@ -5,8 +5,12 @@ from rest_framework.views import APIView
 
 from rest_framework import viewsets                 # for model viewset.
 
+from rest_framework import status                   # to import status code.
+
 from .models import *
 from .serializers import *
+
+from django.contrib.auth.models import User         # helps in registering & login the user
 
 # fetching data using api_view decorator.
 
@@ -123,3 +127,35 @@ class loginAPI(APIView):
 class PeopleViewSet(viewsets.ModelViewSet):
     serializer_class = PersonSerializer
     queryset =Person.objects.all()
+
+    # to filter the data [api/person/?search=____]
+
+    def list(self, request):
+        search = request.GET.get('search')
+        queryset = self.queryset
+        if search:
+            queryset = queryset.filter(name__startswith = search)
+
+        serializer = PersonSerializer(queryset, many=True)
+        return Response({'status':200, 'data':serializer.data}, status=status.HTTP_200_OK)
+                                # status is used to show the status of api.
+    
+#   To registering Users
+class RegisterAPI(APIView):
+
+    def post(self, request):
+        data = request.data
+        serializer = RegisterSerilizer(data=data)
+
+        if not serializer.is_valid():
+            return Response({
+                'status' : False,
+                'message' : serializer.errors,
+            }, status.HTTP_400_BAD_REQUEST )
+        
+        serializer.save()          # .save() method is not of use because we are using save function in serializers.py
+        
+        return Response({'status':True, 
+                         'message':'user created..',
+                    }, status.HTTP_201_CREATED)
+    

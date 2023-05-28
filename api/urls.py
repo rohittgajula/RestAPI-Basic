@@ -15,6 +15,7 @@ urlpatterns = router.urls
 
 urlpatterns = [
     path('', include(router.urls)),                 # for model viewset.
+    path('register/', views.RegisterAPI.as_view()),     # adding .as_view() -- because we are using APIview {class based.}
     path('people/', views.people),
     path('login/', views.login),
     path('personAPI/', views.PersonAPI.as_view()),        # class based views

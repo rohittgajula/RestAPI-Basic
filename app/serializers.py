@@ -1,6 +1,38 @@
 from rest_framework import serializers
 from .models import *
 
+from django.contrib.auth.models import User
+
+# ---- For registration 
+
+class RegisterSerilizer(serializers.Serializer):
+    username = serializers.CharField()
+    email = serializers.EmailField()
+    password = serializers.CharField()
+
+    def validate(self, data):               # to check if username already exists.
+        if data['username']:
+            if User.objects.filter(username = data['username']).exists():
+                raise serializers.ValidationError('username already exists.')
+            
+        if data['email']:                   # to check email already exists.
+            if User.objects.filter(email = data['email']).exists():
+                raise serializers.ValidationError('email already exists.')
+        return data
+    
+    def save(self):             # this method is used when you dont want to override .save() method in views
+        username = self.validated_data['username']
+        email = self.validated_data['email']
+        password = self.validated_data['password']
+        print({'username':username, 'email':email, 'password':password})
+
+                        # | below method is used when save method is used in views
+
+                        # as we are using serializers.Serializer, it doesnot contain built-in create, update method built-in umlike serializers.ModelSerializer
+    
+    # def create(self, validated_data):       
+    #         print(validated_data)
+
 class loginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField()
