@@ -20,21 +20,25 @@ class RegisterSerilizer(serializers.Serializer):
                 raise serializers.ValidationError('email already exists.')
         return data
     
-    def save(self):             # this method is used when you dont want to override .save() method in views
-        username = self.validated_data['username']
-        email = self.validated_data['email']
-        password = self.validated_data['password']
-        print({'username':username, 'email':email, 'password':password})
+    # def save(self):             # this method is used when you dont want to override .save() method in views
+    #     username = self.validated_data['username']
+    #     email = self.validated_data['email']
+    #     password = self.validated_data['password']
+    #     print({'username':username, 'email':email, 'password':password})
 
                         # | below method is used when save method is used in views
 
                         # as we are using serializers.Serializer, it doesnot contain built-in create, update method built-in umlike serializers.ModelSerializer
     
-    # def create(self, validated_data):       
-    #         print(validated_data)
+    def create(self, validated_data):       # to create user.
+            user = User.objects.create(username = validated_data['username'], email = validated_data['email'])
+            user.set_password(validated_data['password'])
+            user.save()
+            return validated_data
+            # print(validated_data)
 
 class loginSerializer(serializers.Serializer):
-    email = serializers.EmailField()
+    username = serializers.CharField()
     password = serializers.CharField()
 
 # class ColorSerializer(serializers.ModelSerializer): # to get data from inner model

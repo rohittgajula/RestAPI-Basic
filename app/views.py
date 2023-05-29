@@ -12,6 +12,14 @@ from .serializers import *
 
 from django.contrib.auth.models import User         # helps in registering & login the user
 
+from django.contrib.auth import authenticate        # for LoginAPI to authenticate
+from rest_framework.authtoken.models import Token   # for LoginAPI to import token
+
+from rest_framework.permissions import IsAuthenticated  # used for token authentication
+from rest_framework.authentication import TokenAuthentication    # for token
+
+from django.core.paginator import Paginator         # paginator used to send huge data in small forms.
+
 # fetching data using api_view decorator.
 
 @api_view(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
@@ -69,11 +77,23 @@ def login(request):
 # fetching data using APIview class.
 
 class PersonAPI(APIView):
+    permission_classes = [IsAuthenticated]          # to use tokens.
+    authentication_classes = [TokenAuthentication]  # to use tokens to allow acess to selected users.
 
     def get(self, request):
-        obj = Person.objects.all()
-        serializer = PersonSerializer(obj, many=True)
-        return Response(serializer.data)
+        try:
+            print(request.user)
+            obj = Person.objects.all()
+            page = request.GET.get('page',1)
+            page_size = 2
+            paginator = Paginator(obj, page_size)
+            serializer = PersonSerializer(paginator.page(page), many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({
+                'status':False,
+                'message':'invalid page'
+            })
     
     def post(self, request):
         data = request.data
@@ -158,4 +178,33 @@ class RegisterAPI(APIView):
         return Response({'status':True, 
                          'message':'user created..',
                     }, status.HTTP_201_CREATED)
+    
+#  Login API
+
+class LoginAPI(APIView):
+
+    def post(self, request):
+        data = request.data
+        serializer = loginSerializer(data=data)
+        if not serializer.is_valid():
+            return Response({
+                'status':False,
+                'message':serializer.errors,
+            }, status.HTTP_400_BAD_REQUEST)
+        
+        user = authenticate(username = serializer.data['username'], password = serializer.data['password'])
+
+        if not user:
+            return Response({
+                'status':False,
+                'message':'invalid creadentials',
+            }, status.HTTP_400_BAD_REQUEST)
+
+        token, _ = Token.objects.get_or_create(user=user)
+
+        return Response({
+            'status': True,
+            'message': 'user created',
+            'token':str(token)
+        }, status.HTTP_201_CREATED)
     

@@ -19,6 +19,7 @@ urlpatterns = [
     path('people/', views.people),
     path('login/', views.login),
     path('personAPI/', views.PersonAPI.as_view()),        # class based views
-    path('loginAPI/', views.loginAPI.as_view()),
+    path('loginapi/', views.loginAPI.as_view()),
+    path('loginAPI/', views.LoginAPI.as_view()),
 ]
 
