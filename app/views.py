@@ -20,6 +20,8 @@ from rest_framework.authentication import TokenAuthentication    # for token
 
 from django.core.paginator import Paginator         # paginator used to send huge data in small forms.
 
+from rest_framework.decorators import action        # action is used to perform all the opertaions in one class
+
 # fetching data using api_view decorator.
 
 @api_view(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
@@ -147,6 +149,7 @@ class loginAPI(APIView):
 class PeopleViewSet(viewsets.ModelViewSet):
     serializer_class = PersonSerializer
     queryset =Person.objects.all()
+    http_method_names = ['get', 'post']             # this helps in acessing those mentioned methods only
 
     # to filter the data [api/person/?search=____]
 
@@ -159,6 +162,17 @@ class PeopleViewSet(viewsets.ModelViewSet):
         serializer = PersonSerializer(queryset, many=True)
         return Response({'status':200, 'data':serializer.data}, status=status.HTTP_200_OK)
                                 # status is used to show the status of api.
+
+    @action(detail=True, methods=['GET'])
+    def send_mail_to_person(self, request, pk):             # add function name after url to call this action
+        obj = Person.objects.get(pk=pk)
+        serializer = PersonSerializer(obj)
+
+        return Response({
+            'status':True,
+            'message':'email sent sucessfuly.',
+            'data': serializer.data
+        })
     
 #   To registering Users
 class RegisterAPI(APIView):
